@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Name : </label>
+                </div>
+                <div class="col-md-10">
+                    <input id="txtName" type="text" placeholder="Student Name" style="width:100%" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Roll : </label>
+                </div>
+                <div class="col-md-10">
+                    <input id="txtRoll" type="text" placeholder="Student Roll" style="width:100%" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Photo : </label>
+                </div>
+                <div class="col-md-10">
+                    <input id="txtFile" type="File" placeholder="Upload Roll" style="width:100%" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img id="imgViewer" width="200" height="200" style="border:1px solid #000000" />
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button id="btnSave" class="btn btn-primary" style="width:100%;margin-top:10px;">Save information</button>
+            <button id="btnRead" class="btn btn-danger" style="width:100%;margin-top:10px;">Read information</button>
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+    });
+    $("#txtFile").change(function(event) { 
+        var files = event.target.files;
+        $("#imgViewer").attr("src",window.URL.createObjectURL(files[0]));
+    });
+    $("#btnSave").click(function() {
+        var files = $("#txtFile").prop("files");
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append("file", files[i]);
+        }
+        var oStudent = {
+            Name: $("#txtName").val(),
+            Roll: $("#txtRoll") .val()
+        };
+
+        formData.append("Student", JSON.stringify(oStudent));
+
+        $.ajax({
+            type:"POST",
+            url: "/Home/SaveFile",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                ResetFields();
+                alert(data);
+            },
+            error: function(data){
+                console.log('Error', data);
+            }
+        });
+
+    });
+
+    $("#btnRead").click(function() {
+         $.ajax({
+            type:"GET",
+            url: "/Home/GetSavedStudent",
+            success: function(data) {
+                $("#txtName").val(data.Name);
+                $("#txtRoll").val(data.Roll);
+                 $("#imgViewer").attr("src", "data:image/jpg;base64,"+data.Photo+"");
+            },
+            error: function(data){
+                console.log('Error', data);
+            }
+        });
+    });
+
+    function ResetFields() {
+        $("#txtName,#txtRoll").val("");
+        $("#imgViewer").attr("src", "");
+    }
+
+</script>
